@@ -75,3 +75,28 @@ train_data_paths = [
 
 test_data_path = "/path/to/your/2_APTOS"
 ```
+
+The script expects the data to be organized in class-based folders (e.g., .../3_DeepDRiD/0, .../3_DeepDRiD/1, etc.).
+3. Training
+Execute the cells sequentially. The main training function is train_model. When you run the final cell, you will be prompted to decide whether to resume training from a checkpoint:
+```bash
+Vuoi continuare l'addestramento o ripartire? (y/Yes/yes per continuare)
+```
+- Enter y or yes to load the latest checkpoint from the /home/jupyter-sdm/GENITO/LAVORO_COMPLETO/Checkpoint_training/ directory and continue training.
+- Enter anything else to start training from scratch.
+
+The training process will display a progress bar for each epoch and print the validation metrics. The best-performing model (based on validation loss) will be saved as best_dinov2_model_con_preprocessing.pth.
+
+4. Evaluation
+After the training is complete, the subsequent cells will:
+
+- Load the best_dinov2_model_con_preprocessing.pth model.
+
+- Run inference on the test set (2_APTOS dataset in this configuration).
+
+- Calculate and display the final performance metrics (Accuracy, F1, AUC, Kappa).
+
+- Generate and show a bar chart of the metrics and a detailed confusion matrix.
+
+5. Confidence Calibration
+The final cell demonstrates how to use Temperature Scaling to calibrate the model's confidence scores. It loads the best model, finds the optimal temperature using the validation set, and reports the Expected Calibration Error (ECE) before and after scaling.
