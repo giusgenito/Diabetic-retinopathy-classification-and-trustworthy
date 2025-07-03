@@ -6,12 +6,9 @@ The notebook handles the entire pipeline: from data loading and preprocessing to
 
 ---
 
-## 📊 Dataset Distribution
+## 📊 Experimental Protocol
 
-The experimental protocol uses a combination of several datasets for training and a separate dataset for testing. The distribution of images across the different severity classes (0 to 4) for the training, validation, and test sets is visualized below. This ensures a clear understanding of the data balance.
-
-![Distribuzione Istanze A Seguito Del Protocollo Sperimentale Applicato Ad APTOS](https://i.imgur.com/8Q0NlG9.png)
-
+Leave One Domain Out experimental protocol uses a combination of several datasets for training and a separate dataset for testing. 
 ---
 
 ## ✨ Key Features
@@ -51,7 +48,30 @@ This strategy allows the model to learn domain-specific features while retaining
 Ensure you have the necessary Python libraries installed. You can install them using pip:
 
 ```bash
-pip install torch torchvision
-pip install scikit-learn matplotlib seaborn tqdm opencv-python
-pip install pytorch-grad-cam
-pip install temperature-scaling
+--extra-index-url https://download.pytorch.org/whl/cu117
+torch==2.0.0
+torchvision==0.15.0
+omegaconf
+torchmetrics==0.10.3
+fvcore
+iopath
+xformers==0.0.18
+submitit
+--extra-index-url https://pypi.nvidia.com
+cuml-cu11
+
+Da completare
+```
+
+2. Dataset Setup
+Before running, you must configure the dataset paths in the second code cell of the notebook.
+```python
+# Main paths
+train_data_paths = [
+   "/path/to/your/3_DeepDRiD",
+   "/path/to/your/6_RLDR",
+   # ... and other training datasets
+]
+
+test_data_path = "/path/to/your/2_APTOS"
+```
