@@ -77,12 +77,3 @@ Each class should be placed in its own subfolder (e.g. `0`, `1`, etc.).
 ## Visualization
 
 After training, the script displays learning curves and confusion matrices for model diagnosis and interpretation.
-
-## Author
-
-- **[Your Name]** - [Your GitHub Username](https://github.com/yourusername)
-
----
-
-**Summary:**  
-This README covers project purpose, installation, requirements, dataset setup, and usage instructions. Replace the author and GitHub info as needed. If you want, I can generate a perfect `requirements.txt` from all your imports—just let me know!
