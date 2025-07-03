@@ -92,3 +92,4 @@ The script is organized into the following main sections:
     * `apply_median_filter`
     * `segment_fundus_and_create_mask`
 * **Dataset Processing Sections**: Each dataset (IDRiD, APTOS, etc.) has its own dedicated section. This section reads the corresponding CSV file, iterates through the images, applies the full preprocessing pipeline, and saves the output. Each section also includes a "Check" cell to verify the number of processed images per class.
+*  **EyePACS and DDR**: This two dataset have a separate folder 
