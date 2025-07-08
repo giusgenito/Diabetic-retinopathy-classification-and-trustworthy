@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>DINOv2 Explainable AI | Upload</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="upload-wrapper">
+            <h1>AI-Powered Retinal Analysis</h1>
+            <p>Upload a fundus image to generate an attention-based explanation using the DINOv2 model. The system will identify key areas influencing the classification.</p>
+            
+            <form id="upload-form" method="post" enctype="multipart/form-data">
+                <input type="file" id="file-upload" name="file" accept="image/png, image/jpeg" required hidden>
+                
+                <label for="file-upload" class="upload-area" id="upload-area">
+                    <div class="icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <p class="upload-area__text">Drag & Drop your image here or <span>browse files</span></p>
+                </label>
+                <p id="file-name"></p>
+                
+                <button type="submit" class="submit-btn">Analyze Image</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="loader-overlay" id="loader">
+        <div class="spinner"></div>
+        <p class="loader-text">Analyzing... This may take a moment.</p>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-upload');
+        const fileNameDisplay = document.getElementById('file-name');
+        const uploadForm = document.getElementById('upload-form');
+        const loader = document.getElementById('loader');
+
+        // Mostra il loader quando il form viene inviato
+        uploadForm.addEventListener('submit', function() {
+            if (fileInput.files.length > 0) {
+                loader.classList.add('visible');
+            }
+        });
+
+        // Gestione Drag & Drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.add('drag-over'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('drag-over'), false);
+        });
+
+        uploadArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            updateFileName();
+        }
+
+        // Aggiorna il nome del file quando selezionato
+        fileInput.addEventListener('change', updateFileName);
+
+        function updateFileName() {
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = `Selected file: ${fileInput.files[0].name}`;
+            } else {
+                fileNameDisplay.textContent = '';
+            }
+        }
+    </script>
+</body>
+</html>

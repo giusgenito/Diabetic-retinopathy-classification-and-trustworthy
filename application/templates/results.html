@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>DINOv2 Explainable AI | Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="results-header">
+            <h1>Analysis Results</h1>
+            <p class="prediction">{{ predicted_class }}</p>
+            <p class="confidence">{{ confidence }}</p>
+        </div>
+        <div class="results-grid">
+            <div class="card"><img src="{{ url_for('send_uploaded_file', filename=original_filename) }}" alt="Original Image" class="card-img"><div class="card-title"><h2>Original Image</h2></div></div>
+            <div class="card"><img src="{{ url_for('static', filename='results/' + analysis_filename) }}" alt="Analysis Image" class="card-img"><div class="card-title"><h2>Composite Analysis</h2></div></div>
+        </div>
+        <div class="back-link-wrapper">
+            <a href="{{ url_for('annotate', original_filename=original_filename, attention_data_filename=attention_data_filename, lesion_data_filename=lesion_data_filename) }}" target="_blank" class="submit-btn" style="background-color: #28a745; margin-right: 20px;">
+                <i class="fa-solid fa-pen-to-square"></i> Annotate Image
+            </a>
+            <a href="{{ url_for('upload_file') }}" class="submit-btn">Analyze Another Image</a>
+        </div>
+    </div>
+</body>
+</html>

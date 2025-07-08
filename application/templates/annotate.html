@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Annotation Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        .toolbar { width: 100%; padding: 10px; background-color: var(--surface-color); display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap; border-bottom: 1px solid var(--border-color); }
+        .toolbar .btn { background-color: var(--primary-color); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; transition: background-color 0.2s; font-family: 'Poppins', sans-serif; font-size: 0.9rem; }
+        .toolbar .btn.active { background-color: #28a745; }
+        .canvas-container-wrapper { flex-grow: 1; width: 100%; background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; overflow: hidden; }
+    </style>
+</head>
+<body>
+
+    <div class="toolbar">
+        <button id="draw-btn" class="btn"><i class="fa-solid fa-pencil"></i> Start Drawing</button>
+        <button id="validate-btn" class="btn"><i class="fa-solid fa-check-circle"></i> Validate Segmentation</button>
+        
+        <div id="validation-result-display" class="info-display">Validation result will appear here</div>
+
+        <button id="toggle-attention-btn" class="btn"><i class="fa-solid fa-eye"></i> Toggle Attention</button>
+        <button id="zoom-in-btn" class="btn"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+        <button id="zoom-out-btn" class="btn"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+        <button id="reset-btn" class="btn"><i class="fa-solid fa-expand"></i> Reset View</button>
+    </div>
+
+    <div class="canvas-container-wrapper"><canvas id="c"></canvas></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const originalImageDataUrl = "{{ original_image_data_url|safe }}";
+            const attentionData = {{ attention_data|tojson }};
+            const lesionBoxes = {{ lesion_data|tojson }};
+
+            const canvas = new fabric.Canvas('c');
+            let attentionHeatmap = null;
+            let heatmapPixelData = null; 
+
+            prepareHeatmapPixelData();
+
+            fabric.Image.fromURL(originalImageDataUrl, 
+                function(img) {
+                    canvas.setWidth(img.width);
+                    canvas.setHeight(img.height);
+                    canvas.setBackgroundImage(img);
+                    drawLesionBoxes();
+                    initializeEventListeners();
+                    canvas.renderAll();
+                }, { crossOrigin: 'anonymous' }
+            );
+
+            function prepareHeatmapPixelData() {
+                if (!attentionData || attentionData.length === 0) return;
+                const tempCanvas = document.createElement('canvas');
+                const ctx = tempCanvas.getContext('2d');
+                const h = attentionData.length;
+                const w = attentionData[0].length;
+                tempCanvas.width = w; tempCanvas.height = h;
+                const imgData = ctx.createImageData(w, h);
+                for (let i = 0; i < h; i++) {
+                    for (let j = 0; j < w; j++) {
+                        const [r, g, b] = jet(attentionData[i][j]);
+                        const index = (i * w + j) * 4;
+                        imgData.data[index] = r; imgData.data[index+1] = g; imgData.data[index+2] = b; imgData.data[index+3] = 255;
+                    }
+                }
+                ctx.putImageData(imgData, 0, 0);
+                heatmapPixelData = ctx.getImageData(0, 0, w, h);
+            }
+
+            function isHotColor(r, g, b) {
+                return (r > 150 && b < 100);
+            }
+
+            // --- FUNZIONE DI VALIDAZIONE MODIFICATA ---
+            // Ora restituisce il rapporto numerico invece di true/false
+            function getHotAreaRatio(areaObject) {
+                if (!heatmapPixelData) return 0;
+                
+                const box = areaObject.getBoundingRect();
+                let totalPixelCount = 0;
+                let hotPixelCount = 0;
+                const scaleX = heatmapPixelData.width / canvas.width;
+                const scaleY = heatmapPixelData.height / canvas.height;
+
+                for (let y = Math.floor(box.top); y < Math.ceil(box.top + box.height); y++) {
+                    for (let x = Math.floor(box.left); x < Math.ceil(box.left + box.width); x++) {
+                        if (areaObject.containsPoint(new fabric.Point(x, y))) {
+                            totalPixelCount++;
+                            const hx = Math.floor(x * scaleX);
+                            const hy = Math.floor(y * scaleY);
+                            if (hy >= 0 && hy < heatmapPixelData.height && hx >= 0 && hx < heatmapPixelData.width) {
+                                const index = (hy * heatmapPixelData.width + hx) * 4;
+                                const r = heatmapPixelData.data[index];
+                                const g = heatmapPixelData.data[index + 1];
+                                const b = heatmapPixelData.data[index + 2];
+                                if (isHotColor(r, g, b)) { hotPixelCount++; }
+                            }
+                        }
+                    }
+                }
+                const hotRatio = totalPixelCount > 0 ? (hotPixelCount / totalPixelCount) : 0;
+                return hotRatio;
+            }
+
+            function initializeEventListeners() {
+                const drawBtn = document.getElementById('draw-btn');
+                const validationDisplay = document.getElementById('validation-result-display');
+                
+                document.getElementById('validate-btn').addEventListener('click', function() {
+                    const activeObject = canvas.getActiveObject();
+                    if (!activeObject || activeObject.type !== 'path') { alert("Please select a segmentation you have drawn first."); return; }
+                    
+                    if (canvas.isDrawingMode) {
+                        canvas.isDrawingMode = false;
+                        drawBtn.classList.remove('active');
+                        drawBtn.innerHTML = '<i class="fa-solid fa-pencil"></i> Start Drawing';
+                    }
+                    
+                    // 1. Calcola il rapporto
+                    const hotRatio = getHotAreaRatio(activeObject);
+                    const percentage = (hotRatio * 100).toFixed(2);
+                    
+                    // 2. Prendi la decisione in base alla soglia
+                    const isHit = hotRatio > 0.10; // Soglia del 10%
+                    
+                    // 3. Aggiorna l'aspetto della sagoma
+                    activeObject.set({ stroke: isHit ? 'lime' : 'red', strokeWidth: 3, fill: 'transparent' });
+                    canvas.renderAll();
+
+                    // 4. Mostra e colora il risultato nel riquadro di testo
+                    validationDisplay.textContent = `Hot Area Overlap: ${percentage}%`;
+                    validationDisplay.style.color = isHit ? 'lime' : 'red';
+                });
+
+                // Il resto degli event listener è invariato...
+                drawBtn.addEventListener('click', function() { canvas.isDrawingMode = !canvas.isDrawingMode; this.classList.toggle('active', canvas.isDrawingMode); if (canvas.isDrawingMode) { this.innerHTML = '<i class="fa-solid fa-stop"></i> Stop Drawing'; canvas.freeDrawingBrush.color = 'rgba(255, 0, 255, 0.7)'; canvas.freeDrawingBrush.width = 5; } else { this.innerHTML = '<i class="fa-solid fa-pencil"></i> Start Drawing'; } });
+                let attentionHeatmap = null; document.getElementById('toggle-attention-btn').addEventListener('click', function() { if (attentionHeatmap) { attentionHeatmap.visible = !attentionHeatmap.visible; canvas.renderAll(); return; } const heatmapDataUrl = createHeatmapImage(attentionData); fabric.Image.fromURL(heatmapDataUrl, function(heatmapImg) { attentionHeatmap = heatmapImg; attentionHeatmap.set({ scaleX: canvas.width / heatmapImg.width, scaleY: canvas.height / heatmapImg.height, opacity: 0.6, selectable: false, evented: false }); canvas.add(attentionHeatmap); attentionHeatmap.moveTo(0); }, { crossOrigin: 'anonymous' }); });
+                document.getElementById('zoom-in-btn').addEventListener('click', () => zoomOnCenter(1.2)); document.getElementById('zoom-out-btn').addEventListener('click', () => zoomOnCenter(1 / 1.2)); document.getElementById('reset-btn').addEventListener('click', resetZoom);
+                let isPanning = false, lastPosX, lastPosY; canvas.on('mouse:down', function(opt) { if (opt.e.altKey === true) { isPanning = true; canvas.selection = false; canvas.defaultCursor = 'grabbing'; lastPosX = opt.e.clientX; lastPosY = opt.e.clientY; }}); canvas.on('mouse:move', function(opt) { if (isPanning) { const e = opt.e; const delta = new fabric.Point(e.clientX - lastPosX, e.clientY - lastPosY); canvas.relativePan(delta); lastPosX = e.clientX; lastPosY = e.clientY; }}); canvas.on('mouse:up', function(opt) { if (isPanning) { isPanning = false; canvas.selection = true; canvas.defaultCursor = 'default'; canvas.renderAll(); }}); canvas.on('mouse:wheel', function(opt) { const delta = opt.e.deltaY; let zoom = canvas.getZoom(); zoom *= 0.999 ** delta; if (zoom > 20) zoom = 20; if (zoom < 0.5) zoom = 0.5; canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom); opt.e.preventDefault(); opt.e.stopPropagation(); });
+            }
+
+            function drawLesionBoxes() {
+                if (!lesionBoxes || lesionBoxes.length === 0) return;
+                const sourceWidth = 504; const sourceHeight = 504;
+                const scaleX = canvas.width / sourceWidth; const scaleY = canvas.height / sourceHeight;
+                lesionBoxes.forEach(box => {
+                    const [x, y, w, h] = box;
+                    const rectForValidation = new fabric.Rect({ left: x * scaleX, top: y * scaleY, width: w * scaleX, height: h * scaleY });
+                    const isHit = getHotAreaRatio(rectForValidation) > 0.10; // Usa la stessa soglia
+                    const rect = new fabric.Rect({ left: x*scaleX, top: y*scaleY, width: w*scaleX, height: h*scaleY, fill: 'transparent', stroke: isHit ? 'lime' : 'red', strokeWidth: 2, selectable: false, evented: false });
+                    canvas.add(rect);
+                });
+            }
+
+            function createHeatmapImage(data) { const tempCanvas = document.createElement('canvas'); const ctx = tempCanvas.getContext('2d'); const h = data.length; const w = data[0].length; tempCanvas.width = w; tempCanvas.height = h; const imgData = ctx.createImageData(w, h); for (let i = 0; i < h; i++) { for (let j = 0; j < w; j++) { const [r, g, b] = jet(data[i][j]); const index = (i * w + j) * 4; imgData.data[index] = r; imgData.data[index+1] = g; imgData.data[index+2] = b; imgData.data[index+3] = 255;}} ctx.putImageData(imgData, 0, 0); return tempCanvas.toDataURL();}
+            function jet(v) { let r=1, g=1, b=1; if (v >= 0.0 && v < 0.125) { b = 0.5 + 4 * v; r = g = 0; } else if (v >= 0.125 && v < 0.375) { b = 1; g = 4 * (v - 0.125); r = 0; } else if (v >= 0.375 && v < 0.625) { b = 1 - 4 * (v - 0.375); g = 1; r = 4 * (v - 0.375); } else if (v >= 0.625 && v < 0.875) { g = 1 - 4 * (v - 0.625); r = 1; b = 0; } else { r = 1; g = b = 0; } return [Math.round(r*255), Math.round(g*255), Math.round(b*255)]; }
+            function zoomOnCenter(factor) { const newZoom = canvas.getZoom() * factor; if(newZoom > 20 || newZoom < 0.5) return; canvas.zoomToPoint(new fabric.Point(canvas.width / 2, canvas.height / 2), newZoom); }
+            function resetZoom() { canvas.setZoom(1); canvas.absolutePan({x:0, y:0}); }
+        });
+    </script>
+</body>
+</html>
