@@ -26,7 +26,7 @@ To overcome this challenge, our approach combines a powerful, pre-trained model 
 
 2.  **Trustworthy and Explainable Predictions**: A key barrier to AI adoption in clinics is the "black box" nature of models. We use the **Attention Rollout** technique to generate heatmaps that visualize exactly which parts of the retinal image the model focused on to make its prediction. This allows clinicians to verify that the model's reasoning aligns with known pathological biomarkers (e.g., microaneurysms, hemorrhages), building trust and turning the AI into a collaborative diagnostic tool.
 
-![Explainability Example](immagine dell'app)
+![Explainability Example](readme_image/interface_demo.png)
 *Figure: The web application interface shows the original image alongside a composite analysis, which includes an attention heatmap and bounding boxes indicating detected lesions*
 
 ---
