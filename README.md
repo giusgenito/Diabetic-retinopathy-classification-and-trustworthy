@@ -44,21 +44,21 @@ A crucial first step was to create a standardized and robust image preprocessing
 
 **Key Steps**: Grayscale conversion, fundus segmentation, CLAHE for contrast enhancement, noise reduction, and size normalization with padding to 512x512 pixels.
 
-➡️ **For more details, see the `preprocessing/` directory and its [README_preprocessing.md](README_preprocessing.md).**
+➡️ **For more details, see the `preprocessing/` directory and its [README.md].**
 
 ### 2. 🧠 Model Training & Evaluation
 This component contains the scripts for training and evaluating the DinoV2-DR model. The training process uses a **Leave-One-Domain-Out (LODO)** protocol across six datasets to rigorously test the model's generalization capabilities.
 
 **Key Features**: Selective fine-tuning of the DINOv2 backbone, a custom classification head, and evaluation using metrics like AUC, F1-Score, and Accuracy.
 
-➡️ **For more details, see the `model/` directory and its [README_model.md](README_model.md).**
+➡️ **For more details, see the `model/` directory and its [README.md].**
 
 ### 3. 💻 Explainability Web Application
 To demonstrate the practical application of our work, we developed an interactive web tool using Flask. This application allows a user to upload a retinal fundus image and receive not only a classification of its DR stage but also a visual explanation of the model's decision-making process.
 
 **Key Features**: DR classification, attention map generation [cite: 669][cite_start], and a "lesion hit-analysis" that compares the model's focus areas with ground-truth lesion masks.
 
-➡️ **For more details, see the `application/` directory and its [README_app.md](README_app.md).**
+➡️ **For more details, see the `application/` directory and its [README.md].**
 
 ---
 ## 📊 Key Results
