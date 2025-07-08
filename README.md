@@ -1,7 +1,3 @@
-Certamente, ecco il README completo in formato Markdown.
-
-Markdown
-
 # Self-Supervised Vision Transformers for Trustworthy Cross-Domain Diabetic Retinopathy Classification
 
 **Author**: Giuseppe Genito
