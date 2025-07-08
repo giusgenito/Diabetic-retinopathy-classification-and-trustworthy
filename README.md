@@ -15,7 +15,7 @@
 
 Deep learning models often fail to generalize when tested on data from a "domain" different from the one they were trained on. In the context of retinal imaging, this variability comes from differences in cameras, hospital protocols, and patient demographics.
 
-![Domain Shift Example](da inserire)
+![Domain Shift Example](readme_image/camere_fondi.png)
 *Figure: Retinal images from different datasets, captured with different cameras, show significant variability in lighting, zoom, and color, posing a major challenge for AI models*
 
 ## 💡 Our Approach: DINOv2 + Explainable AI (XAI)
