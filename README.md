@@ -69,6 +69,4 @@ Our proposed **DinoV2-DR** model significantly outperforms existing state-of-the
 | GAD  | 83.3% | 57.4 | 44.6% |
 | **DinoV2-DR (Ours)** | **85.73%** | **63.47%** | **50.15%** |
 
-[cite_start]*Table: Comparison with the state-of-the-art on the GDRBench benchmark, demonstrating a significant improvement in generalization performance[cite: 711].*
-
 ---
