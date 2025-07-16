@@ -1,4 +1,5 @@
-# Self-Supervised Vision Transformers for Trustworthy Cross-Domain Diabetic Retinopathy Classification
+# Dino2-DR: A Trustworthy and Explainable Vision Transformer for
+Cross-Domain Diabetic Retinopathy Grading
 
 **Author**: Giuseppe Genito
 [cite_start]**Thesis**: Master's Degree in Computer Science, Data Science and Machine Learning Curriculum [cite: 6, 7]
