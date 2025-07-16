@@ -1,5 +1,4 @@
-# Dino2-DR: A Trustworthy and Explainable Vision Transformer for
-Cross-Domain Diabetic Retinopathy Grading
+# Dino2-DR: A Trustworthy and Explainable Vision Transformer for Cross-Domain Diabetic Retinopathy Grading
 
 **Author**: Giuseppe Genito
 [cite_start]**Thesis**: Master's Degree in Computer Science, Data Science and Machine Learning Curriculum [cite: 6, 7]
@@ -12,6 +11,10 @@ Cross-Domain Diabetic Retinopathy Grading
 
 ---
 
+## News
+**2025.07** Our paper "Dino2-DR: A Trustworthy and Explainable Vision Transformer for Cross-Domain Diabetic Retinopathy Grading" was early accepted to ICCV 2025—BISCUIT Workshop
+
+---
 ## 🎯 The Challenge: Domain Shift in Medical Imaging
 
 Deep learning models often fail to generalize when tested on data from a "domain" different from the one they were trained on. In the context of retinal imaging, this variability comes from differences in cameras, hospital protocols, and patient demographics.
